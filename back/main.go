@@ -17,9 +17,6 @@ import (
 	"github.com/dghubble/sessions"
 )
 
-var (
-)
-
 const (
 	sessionName             = "example-twtter-app"
 	sessionSecret           = "example cookie signing secret"
