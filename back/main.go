@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"errors"
 	//"os"
 
 	"github.com/Fukkatsuso/oauth-sample/app/lib/twitter"
@@ -10,7 +11,31 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/mrjones/oauth"
 )
+
+func Tweet(c *gin.Context, token *oauth.AccessToken, post string) error {
+	
+	client := twitter.NewClient()
+	params := map[string]string{
+		"status": post,
+	}
+	resp, err := client.Post("https://api.twitter.com/1.1/direct_messages/events/new.json", token)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 500 {
+		return errors.New("twitter is unavailable")
+	}
+	if resp.StatusCode >= 400 {
+		return errors.New("twitter request is invalid")
+	}
+
+	return nil
+}
+
 
 func main() {
 	store := cookie.NewStore([]byte("secret"))
@@ -45,6 +70,8 @@ func main() {
 			return
 		}
 		// プロフィール取得
+		fmt.Println(aToken)
+
 		user := twitter.User{}
 		_ = twitter.GetUser(c, aToken, &user)
 		// if err != nil {
@@ -69,7 +96,7 @@ func main() {
 		// })
 	})
 	r.GET("/callback", func(c *gin.Context) {
-		c.Redirect(http.StatusSeeOther, "/about")
+		c.Redirect(http.StatusSeeOther, "/settings")
 	})
 	r.GET("/twitter/oauth", func(c *gin.Context) {
 		loginURL, err := twitter.OAuth(c)
@@ -101,21 +128,40 @@ func main() {
 			"title": "twitter unauthorize successed",
 		})
 	})
-	r.POST("/twitter/post", func(c *gin.Context) {
+	// r.POST("/twitter/post", func(c *gin.Context) {
+	// 	aToken := twitter.GetAccessToken(c)
+	// 	if aToken == nil {
+	// 		c.Redirect(http.StatusSeeOther, "/twitter/oauth")
+	// 		return
+	// 	}
+	// 	post := twitter.NewPost{
+	// 		Status: c.PostForm("content"),
+	// 	}
+	// 	err := twitter.Tweet(c, aToken, &post)
+	// 	if err != nil {
+	// 		c.Redirect(http.StatusSeeOther, "/twitter")
+	// 		return
+	// 	}
+	// 	c.Redirect(http.StatusFound, "/twitter")
+	// })
+	r.POST("/add", func(c *gin.Context){
 		aToken := twitter.GetAccessToken(c)
 		if aToken == nil {
 			c.Redirect(http.StatusSeeOther, "/twitter/oauth")
 			return
 		}
+
 		post := twitter.NewPost{
 			Status: c.PostForm("content"),
 		}
+
 		err := twitter.Tweet(c, aToken, &post)
 		if err != nil {
 			c.Redirect(http.StatusSeeOther, "/twitter")
 			return
 		}
 		c.Redirect(http.StatusFound, "/twitter")
+
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080
