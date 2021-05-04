@@ -68,6 +68,9 @@ func main() {
 		// 	"timeline": tl,
 		// })
 	})
+	r.GET("/callback", func(c *gin.Context) {
+		c.Redirect(http.StatusSeeOther, "/about")
+	})
 	r.GET("/twitter/oauth", func(c *gin.Context) {
 		loginURL, err := twitter.OAuth(c)
 		if err != nil {
@@ -85,7 +88,7 @@ func main() {
 			return
 		}
 		//fmt.Println(redirectURL)
-		c.Redirect(http.StatusFound, "/api/proxy/twitter")
+		c.Redirect(http.StatusFound, "/api/proxy/callback")
 		//c.Redirect(http.StatusFound, redirectURL)
 	})
 	r.POST("/twitter/unoauth", func(c *gin.Context) {

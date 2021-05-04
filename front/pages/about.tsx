@@ -5,7 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ButtonBase from '@material-ui/core/ButtonBase';
-
+import {useState, useEffect} from 'react';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,9 +34,31 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const AboutPage = (data) => {
+interface User{
+  id_str: string;
+  name: string;
+  screen_name: string;
+  profile_image_url_https: string;
+}
+
+const AboutPage = () => {
   const classes = useStyles();
-  console.log(data);
+  const [data, setData] = useState<User>(false);
+
+  useEffect(async () => {
+    axios.get('./api/proxy/twitter').then((res) => {
+      console.log(res.data.user);
+      setData(res.data.user);
+      })
+  }, [])
+
+  const get = () => {
+    axios.get('./api/proxy/twitter').then((res) =>{
+      console.log(res)
+    })
+  }
+
+
   return (
   <div className={classes.root}>
     <title>hoge</title>
@@ -46,48 +69,37 @@ const AboutPage = (data) => {
               <img className={classes.img} alt="complex" src={data.profile_image_url_https} />
             </ButtonBase>
           </Grid>
-          <Grid item xs={12} sm container>
-            <Grid item xs container direction="column" spacing={2}>
+          <Grid item xs={3} container>
+            <Grid item xs container direction="column" spacing={5}>
               <Grid item xs>
                 <Typography gutterBottom variant="subtitle1">
-                  Standard license
+                  {data.name}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  Full resolution 1920x1080 • JPEG
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  ID: 1030114
+                  {data.screen_name}
                 </Typography>
               </Grid>
-              <Grid item>
-                <Typography variant="body2" style={{ cursor: 'pointer' }}>
-                  Remove
-                </Typography>
-              </Grid>
-            </Grid>
-            <Grid item>
-              <Typography variant="subtitle1">$19.00</Typography>
             </Grid>
           </Grid>
         </Grid>
       </Paper>
-    <Button variant="contained" color="primary">Log in</Button>
+    {/* <Button variant="contained" color="primary" onClick={get}>Log in</Button> */}
   </div>
   )
 }
 
 export default AboutPage
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  //const id = context.query;
-  const cookie = context.req?.headers.cookie;
-  const res = await fetch('http://localhost:8080/twitter',{
-    headers: {
-      cookie: cookie!
-    }
-  });
-  const data = await res.json();
-  console.log(data);
-  console.log(res);
-  return {props: res};
-}
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   //const id = context.query;
+//   const cookie = context.req?.headers.cookie;
+//   const res = await fetch('http://localhost:8080/twitter',{
+//     headers: {
+//       cookie: cookie!
+//     }
+//   });
+//   const data = await res.json();
+//   console.log(data);
+//   console.log(res);
+//   return {props: res};
+// }
