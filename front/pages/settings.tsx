@@ -1,14 +1,14 @@
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
+import { makeStyles } from '@material-ui/core/styles';
+import {useState, useEffect} from 'react';
+import axios from 'axios';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ButtonBase from '@material-ui/core/ButtonBase';
-import {useState, useEffect} from 'react';
-import axios from 'axios';
+import Button from '@material-ui/core/Button';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
+
+const useStyles = makeStyles({
     root: {
       '& > *': {
         flexGrow: 1,
@@ -20,7 +20,6 @@ const useStyles = makeStyles((theme: Theme) =>
       }
     },
     paper: {
-      padding: theme.spacing(2),
       margin: 'auto',
       maxWidth: 500,
     },
@@ -34,10 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: '100%',
       maxHeight: '100%',
     },
-  }),
-);
+})
 
-interface User{
+export interface User{
   id_str: string;
   name: string;
   screen_name: string;
@@ -45,9 +43,12 @@ interface User{
 }
 
 const AboutPage = () => {
+  // @ts-ignore
   const classes = useStyles();
-  const [data, setData] = useState<User>(false);
+  // @ts-ignore
+  const [data, setData] = useState<User>({id_str:"", name:"", screen_name:"", profile_image_url_https:""});
 
+  // @ts-ignore
   useEffect(async () => {
     console.log(49);
     axios.get('./api/proxy/twitter').then((res) => {
@@ -93,7 +94,7 @@ const AboutPage = () => {
           </Grid>
         </Grid>
       </Paper>
-      <div >
+      <div>
         <Button variant="contained" color="secondary" onClick={allMute}>All Mute</Button>
         <Button variant="contained" onClick={allUnMute}>All UnMute</Button>
       </div>

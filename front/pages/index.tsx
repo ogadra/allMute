@@ -1,10 +1,9 @@
 import { GetServerSideProps } from 'next';
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles({
     root: {
       '& > *': {
         margin: "auto",
@@ -13,14 +12,14 @@ const useStyles = makeStyles((theme: Theme) =>
         textAlign: "center"
       },
     },
-  }),
+  },
 );
 
 export interface Message{
   message: string;
 }
 
-const IndexPage = (id: string[]) => {
+const IndexPage = () => {
   const login = () =>{
     axios.get('./api/proxy/twitter/oauth').then((res) => {
       console.log(res.headers);
@@ -32,12 +31,12 @@ const IndexPage = (id: string[]) => {
     })
   }
 
-  const display = () => {
+  // const display = () => {
     
-    axios.get(`${process.env.NEXT_PUBLIC_FRONT_SERVER}/api/proxy/twitter`).then((res) => {
-      console.log(res.data.user);
-    })
-  }
+  //   axios.get(`${process.env.NEXT_PUBLIC_FRONT_SERVER}/api/proxy/twitter`).then((res) => {
+  //     console.log(res.data.user);
+  //   })
+  // }
 
   const classes = useStyles();
   return(
