@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import httpProxy from 'http-proxy';
 
-const target = "http://localhost:8080/"
+const target = process.env.BACK_SERVER
 const proxy = httpProxy.createProxyServer({ target, changeOrigin: true });
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {

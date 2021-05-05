@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -12,9 +11,13 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       '& > *': {
-        margin: theme.spacing(1),
         flexGrow: 1,
+        display: "block",
+        textAlign: "center",
       },
+      '& > * > *': {
+        margin: "5% 5%",
+      }
     },
     paper: {
       padding: theme.spacing(2),
@@ -46,22 +49,29 @@ const AboutPage = () => {
   const [data, setData] = useState<User>(false);
 
   useEffect(async () => {
+    console.log(49);
     axios.get('./api/proxy/twitter').then((res) => {
-      console.log(res.data.user);
+      console.log(res);
       setData(res.data.user);
       })
   }, [])
 
-  const get = () => {
-    axios.post('./api/proxy/twitter/post').then((res) =>{
+  const allMute = () => {
+    const httpClient = axios.create();
+    httpClient.defaults.timeout = 7200000;
+    httpClient.post('./api/proxy/twitter/allMute').then((res) =>{
+      console.log(res);
+    })
+  }
+  const allUnMute = () => {
+    axios.post('./api/proxy/twitter/allUnMute').then((res) =>{
       console.log(res);
     })
   }
 
-
   return (
   <div className={classes.root}>
-    <title>hoge</title>
+    <title>ツイッターを破壊</title>
     <Paper className={classes.paper}>
         <Grid container spacing={2}>
           <Grid item>
@@ -83,23 +93,12 @@ const AboutPage = () => {
           </Grid>
         </Grid>
       </Paper>
-    <Button variant="contained" color="primary" onClick={get}>Log in</Button>
+      <div >
+        <Button variant="contained" color="secondary" onClick={allMute}>All Mute</Button>
+        <Button variant="contained" onClick={allUnMute}>All UnMute</Button>
+      </div>
   </div>
   )
 }
 
 export default AboutPage
-
-// export const getServerSideProps: GetServerSideProps = async (context) => {
-//   //const id = context.query;
-//   const cookie = context.req?.headers.cookie;
-//   const res = await fetch('http://localhost:8080/twitter',{
-//     headers: {
-//       cookie: cookie!
-//     }
-//   });
-//   const data = await res.json();
-//   console.log(data);
-//   console.log(res);
-//   return {props: res};
-// }

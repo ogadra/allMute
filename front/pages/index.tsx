@@ -7,7 +7,10 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       '& > *': {
-        margin: theme.spacing(1),
+        margin: "auto",
+        width: "150px",
+        display: "block",
+        textAlign: "center"
       },
     },
   }),
@@ -30,8 +33,8 @@ const IndexPage = (id: string[]) => {
   }
 
   const display = () => {
-
-    axios.get(`http://localhost:3000/api/proxy/twitter`).then((res) => {
+    
+    axios.get(`${process.env.NEXT_PUBLIC_FRONT_SERVER}/api/proxy/twitter`).then((res) => {
       console.log(res.data.user);
     })
   }
@@ -39,8 +42,8 @@ const IndexPage = (id: string[]) => {
   const classes = useStyles();
   return(
     <div className={classes.root}>
-      <title>hoge</title>
-
+      <title>ツイッターを破壊</title>
+        <br/>
         <Button variant="contained" color="primary" onClick={login}>Log in</Button>
     </div>
   )
