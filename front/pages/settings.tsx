@@ -57,15 +57,9 @@ const AboutPage = () => {
       })
   }, [])
 
-  const allMute = () => {
+  const callMethod = (method:string) => {
     const httpClient = axios.create();
-    httpClient.defaults.timeout = 7200000;
-    httpClient.post('./api/proxy/twitter/allMute').then((res) =>{
-      console.log(res);
-    })
-  }
-  const allUnMute = () => {
-    axios.post('./api/proxy/twitter/allUnMute').then((res) =>{
+    httpClient.post(`./api/proxy/twitter/mute/${method}`).then((res) =>{
       console.log(res);
     })
   }
@@ -96,8 +90,8 @@ const AboutPage = () => {
         </Grid>
       </Paper>
       <div>
-        <Button variant="contained" color="secondary" onClick={allMute}>All Mute</Button>
-        <Button variant="contained" onClick={allUnMute}>All UnMute</Button>
+        <Button variant="contained" color="secondary" onClick={() => callMethod("create")}>All Mute</Button>
+        <Button variant="contained" onClick={() => callMethod("destroy")}>All UnMute</Button>
       </div>
     </div>
   </div>
