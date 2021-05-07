@@ -2,6 +2,7 @@ import { GetServerSideProps } from 'next';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
+import Header from '../components/header';
 
 const useStyles = makeStyles({
     root: {
@@ -41,9 +42,10 @@ const IndexPage = () => {
   const classes = useStyles();
   return(
     <div className={classes.root}>
-      <title>ツイッターを破壊</title>
-        <br/>
+      <Header title="ツイッターを破壊" />
+      <div>
         <Button variant="contained" color="primary" onClick={login}>Log in</Button>
+      </div>
     </div>
   )
 }

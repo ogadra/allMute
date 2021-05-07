@@ -6,7 +6,7 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
-
+import Header from '../components/header';
 
 const useStyles = makeStyles({
     root: {
@@ -71,8 +71,9 @@ const AboutPage = () => {
   }
 
   return (
-  <div className={classes.root}>
-    <title>ツイッターを破壊</title>
+  <div>
+    <Header title="ツイッターを破壊"/>
+    <div className={classes.root}>
     <Paper className={classes.paper}>
         <Grid container spacing={2}>
           <Grid item>
@@ -98,6 +99,7 @@ const AboutPage = () => {
         <Button variant="contained" color="secondary" onClick={allMute}>All Mute</Button>
         <Button variant="contained" onClick={allUnMute}>All UnMute</Button>
       </div>
+    </div>
   </div>
   )
 }
