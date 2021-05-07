@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
-	"errors"
+	//"errors"
 	"net/http"
 	"os"
+	"encoding/json"
+	"time"
+	"io"
 	//"m/lib/makeParam"
+	"strconv"
 
 	"github.com/Fukkatsuso/oauth-sample/app/lib/twitter"
 	"github.com/gin-contrib/cors"
@@ -14,7 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/mrjones/oauth"
-
+	// "github.com/gin-contrib/timeout"
 	// "github.com/dghubble/go-twitter/twitter"
 	// "github.com/dghubble/oauth1"
 )
@@ -27,30 +31,75 @@ type creds struct{
 	AccessSecret string
 }
 
-func dm(c *gin.Context, body string, token *oauth.AccessToken) error {
+type followers struct {
+	Ids []int64 `json:"ids"`
+	Next_cursor int64 `json:"next_cursor"`
+	Next_cursor_str string `json:"next_cursor_str"`
+	Previous_cursor int64 `json:"previous_cursor"`
+	Previous_cursor_str string `json:"previous_cursor_str"`
+}
+
+// func dm(c *gin.Context, body string, token *oauth.AccessToken) error {
+// 	client := twitter.NewClient()
+// 	fmt.Println(body)
+// 	resp, err := client.PostJson("https://api.twitter.com/1.1/direct_messages/events/new.json", body, token)
+// 	fmt.Println(resp)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer resp.Body.Close()
+
+// 	if resp.StatusCode >= 500 {
+// 		return errors.New("twitter is unavailable")
+// 	}
+// 	if resp.StatusCode >= 400 {
+// 		return errors.New("twitter request is invalid")
+// 	}
+// 	return nil
+// }
+
+func allMute(c *gin.Context, token *oauth.AccessToken, method string) {
+
 	client := twitter.NewClient()
-	//userParams := map[string]string{"status":"fuga"}
-	fmt.Println(body)
-	resp, err := client.PostJson("https://api.twitter.com/1.1/direct_messages/events/new.json", body, token)
-	fmt.Println(resp)
-	if err != nil {
-		return err
+	aToken := twitter.GetAccessToken(c)
+	user := twitter.User{}
+	_ = twitter.GetUser(c, aToken, &user)
+	params := map[string]string{"screen_name": user.ScreenName}
+	resp, err := client.Get("https://api.twitter.com/1.1/friends/ids.json", params, token)
+
+	if err != nil{
+		fmt.Println(71, err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= 500 {
-		return errors.New("twitter is unavailable")
-	}
-	if resp.StatusCode >= 400 {
-		return errors.New("twitter request is invalid")
+	var r io.Reader = resp.Body
+    r = io.TeeReader(r, os.Stderr)
+	var f followers
+
+	err = json.NewDecoder(r).Decode(&f)
+	if err != nil {
+		fmt.Println(err)
 	}
 
-	return nil
+	for _, v := range f.Ids {
+		params = map[string]string{"user_id": strconv.FormatInt(v, 10)}
+
+		for{
+			resp, err = client.PostWithBody("https://api.twitter.com/1.1/mutes/users/" + method + ".json", "", params, token)
+			if resp.StatusCode == 429{
+				time.Sleep((time.Minute * 16))
+			} else if resp.StatusCode == 200{
+				break
+			}
+		}
+		if err != nil{
+			fmt.Println(err)
+		}
+	}
 }
 
 func main() {
 	godotenv.Load(fmt.Sprintf("%s.env", os.Getenv("GO_ENV")))
-	//fmt.Println(os.Getenv("TWITTER_API_SECRET"))
 	store := cookie.NewStore([]byte("secret"))
 	store.Options(sessions.Options{
 		MaxAge: 60 * 60 * 24,
@@ -59,10 +108,8 @@ func main() {
 	r := gin.Default()
 	r.Use(sessions.Sessions("session", store))
 	r.Use(cors.New(cors.Config{
-		// 許可したいHTTPリクエストヘッダの一覧
-		// 許可したいアクセス元の一覧
 		AllowOrigins: []string{
-			"http://localhost:3000",
+			os.Getenv("FRONT_SERVER"),
 		},
 	}))
 	r.LoadHTMLGlob("views/html/*")
@@ -86,25 +133,10 @@ func main() {
 		user := twitter.User{}
 		_ = twitter.GetUser(c, aToken, &user)
 		// if err != nil {
-		// 	c.Redirect(http.StatusSeeOther, "/twitter/oauth")
-		// 	return
-		// }
+
 
 		fmt.Println(user)
 		c.JSON(200, gin.H{"user": user})
-		// タイムライン取得
-		// tl := twitter.UserTimeline{}
-		// err = twitter.GetUserTimeline(c, aToken, user.ID, &tl)
-		// if err != nil {
-		// 	c.Redirect(http.StatusSeeOther, "/twitter/oauth")
-		// 	return
-		// }
-		// // ユーザーページ表示
-		// c.HTML(http.StatusOK, "twitter.html", gin.H{
-		// 	"title":    "user page",
-		// 	"user":     user,
-		// 	"timeline": tl,
-		// })
 	})
 	r.GET("/callback", func(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/settings")
@@ -139,67 +171,34 @@ func main() {
 			"title": "twitter unauthorize successed",
 		})
 	})
-	r.POST("/twitter/post", func(c *gin.Context) {
-		
+	r.POST("/twitter/mute/:method", func(c *gin.Context){
 		aToken := twitter.GetAccessToken(c)
 		if aToken == nil {
 			c.Redirect(http.StatusSeeOther, "/twitter/oauth")
 			return
 		}
-
-		body  := fmt.Sprintf("{\"event\":{\"type\":\"message_create\",\"message_create\":{\"target\":{\"recipient_id\":\"%s\"},\"message_data\":{\"text\":\"%s\"}}}}", "3065740112", "hello")
-		err := dm(c, body, aToken)
-		if err != nil {
-			fmt.Println(err)
-			c.Redirect(http.StatusSeeOther, "/twitter")
-			return
-		}
-		//c.Redirect(http.StatusFound, "/twitter")
-		c.JSON(200, gin.H{"user": "ok"})
-		// var tokens creds
-		// tokens.ConsumerKey = os.Getenv("TWITTER_API_KEY")
-		// tokens.AccessToken = os.Getenv("TWITTER_API_SECRET")
-		// tokens.ConsumerSecret = aToken.Token
-		// tokens.AccessSecret = aToken.Secret
-		
-		// additionalParam := map[string]string{}
-		// authHeader := makeParam.ManualOauthSettings(tokens, additionalParam, "POST", "https://api.twitter.com/1.1/direct_messages/events/new.json")
-
-		// body := []byte(fmt.Sprintf("{\"event\":{\"type\":\"message_create\",\"message_create\":{\"target\":{\"recipient_id\":\"%s\"},\"message_data\":{\"text\":\"%s\"}}}", "3065740112", "hello"))
-
-		// req, err := http.NewRequest("POST", "https://api.twitter.com/1.1/statuses/update.json", body)
-		// if err != nil {
-		// 	return
-		// }
-		// req.Header.Set("Authorization", authHeader)
-		// req.URL.RawQuery = makeParam.SortedQueryString(addtionalParam)
-
-		// client := http.Client{}
-		// resp, err := client.Do(req)
-		// if err != nil {
-		// 	return
-		// }
-		// defer resp.Body.Close()
+		go allMute(c, aToken, c.Param("method"))
 	})
-	r.POST("/add", func(c *gin.Context) {
-		aToken := twitter.GetAccessToken(c)
-		if aToken == nil {
-			c.Redirect(http.StatusSeeOther, "/twitter/oauth")
-			return
-		}
 
-		post := twitter.NewPost{
-			Status: c.PostForm("content"),
-		}
+	// r.POST("/add", func(c *gin.Context) {
+	// 	aToken := twitter.GetAccessToken(c)
+	// 	if aToken == nil {
+	// 		c.Redirect(http.StatusSeeOther, "/twitter/oauth")
+	// 		return
+	// 	}
 
-		err := twitter.Tweet(c, aToken, &post)
-		if err != nil {
-			c.Redirect(http.StatusSeeOther, "/twitter")
-			return
-		}
-		c.Redirect(http.StatusFound, "/twitter")
+	// 	post := twitter.NewPost{
+	// 		Status: c.PostForm("content"),
+	// 	}
 
-	})
+	// 	err := twitter.Tweet(c, aToken, &post)
+	// 	if err != nil {
+	// 		c.Redirect(http.StatusSeeOther, "/twitter")
+	// 		return
+	// 	}
+	// 	c.Redirect(http.StatusFound, "/twitter")
+
+	// })
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
