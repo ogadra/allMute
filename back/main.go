@@ -39,25 +39,6 @@ type followers struct {
 	Previous_cursor_str string `json:"previous_cursor_str"`
 }
 
-// func dm(c *gin.Context, body string, token *oauth.AccessToken) error {
-// 	client := twitter.NewClient()
-// 	fmt.Println(body)
-// 	resp, err := client.PostJson("https://api.twitter.com/1.1/direct_messages/events/new.json", body, token)
-// 	fmt.Println(resp)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if resp.StatusCode >= 500 {
-// 		return errors.New("twitter is unavailable")
-// 	}
-// 	if resp.StatusCode >= 400 {
-// 		return errors.New("twitter request is invalid")
-// 	}
-// 	return nil
-// }
-
 func allMute(c *gin.Context, token *oauth.AccessToken, method string) {
 
 	client := twitter.NewClient()
@@ -68,7 +49,7 @@ func allMute(c *gin.Context, token *oauth.AccessToken, method string) {
 	resp, err := client.Get("https://api.twitter.com/1.1/friends/ids.json", params, token)
 
 	if err != nil{
-		fmt.Println(71, err)
+		fmt.Println(err)
 	}
 	defer resp.Body.Close()
 
@@ -83,11 +64,10 @@ func allMute(c *gin.Context, token *oauth.AccessToken, method string) {
 
 	for _, v := range f.Ids {
 		params = map[string]string{"user_id": strconv.FormatInt(v, 10)}
-
 		for{
 			resp, err = client.PostWithBody("https://api.twitter.com/1.1/mutes/users/" + method + ".json", "", params, token)
 			if resp.StatusCode == 429{
-				time.Sleep((time.Minute * 16))
+				time.Sleep((time.Minute * 1))
 			} else if resp.StatusCode == 200{
 				break
 			}
@@ -112,13 +92,6 @@ func main() {
 			os.Getenv("FRONT_SERVER"),
 		},
 	}))
-	r.LoadHTMLGlob("views/html/*")
-
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "OAuth sample app!",
-		})
-	})
 
 	r.GET("/twitter", func(c *gin.Context) {
 		aToken := twitter.GetAccessToken(c)
@@ -128,14 +101,11 @@ func main() {
 			return
 		}
 		// プロフィール取得
-		fmt.Println(aToken)
+
 
 		user := twitter.User{}
 		_ = twitter.GetUser(c, aToken, &user)
-		// if err != nil {
 
-
-		fmt.Println(user)
 		c.JSON(200, gin.H{"user": user})
 	})
 	r.GET("/callback", func(c *gin.Context) {
@@ -147,19 +117,16 @@ func main() {
 			c.Redirect(http.StatusSeeOther, "/")
 			return
 		}
-		fmt.Println(69, loginURL)
 		c.JSON(200, gin.H{"url": loginURL})
 	})
 	r.GET("/twitter/callback", func(c *gin.Context) {
 		redirectURL, err := twitter.Callback(c)
-		fmt.Println(114, redirectURL)
+		fmt.Println(redirectURL)
 		if err != nil {
 			c.Redirect(http.StatusSeeOther, "/twitter/oauth")
 			return
 		}
-		//fmt.Println(redirectURL)
 		c.Redirect(http.StatusFound, "/api/proxy/callback")
-		//c.Redirect(http.StatusFound, redirectURL)
 	})
 	r.POST("/twitter/unoauth", func(c *gin.Context) {
 		err := twitter.UnOAuth(c)
@@ -167,9 +134,7 @@ func main() {
 			c.Redirect(http.StatusSeeOther, "/")
 			return
 		}
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"title": "twitter unauthorize successed",
-		})
+		c.JSON(200, gin.H{"status": "logouted"})
 	})
 	r.POST("/twitter/mute/:method", func(c *gin.Context){
 		aToken := twitter.GetAccessToken(c)
@@ -179,26 +144,6 @@ func main() {
 		}
 		go allMute(c, aToken, c.Param("method"))
 	})
-
-	// r.POST("/add", func(c *gin.Context) {
-	// 	aToken := twitter.GetAccessToken(c)
-	// 	if aToken == nil {
-	// 		c.Redirect(http.StatusSeeOther, "/twitter/oauth")
-	// 		return
-	// 	}
-
-	// 	post := twitter.NewPost{
-	// 		Status: c.PostForm("content"),
-	// 	}
-
-	// 	err := twitter.Tweet(c, aToken, &post)
-	// 	if err != nil {
-	// 		c.Redirect(http.StatusSeeOther, "/twitter")
-	// 		return
-	// 	}
-	// 	c.Redirect(http.StatusFound, "/twitter")
-
-	// })
 
 	r.Run() // listen and serve on 0.0.0.0:8080
 }

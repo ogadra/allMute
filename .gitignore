@@ -2,6 +2,5 @@
 !*/
 !*.*
 *.env*
-back/lib/twitter/go*
 
 memo*
