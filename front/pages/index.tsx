@@ -23,7 +23,7 @@ export interface Message{
 const IndexPage = () => {
   const login = () =>{
     axios.get('./api/proxy/twitter/oauth').then((res) => {
-      console.log(res.headers);
+      console.log(res);
       switch (res.status){
         case 200:
           location.href = res.data.url;
