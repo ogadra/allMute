@@ -99,7 +99,7 @@ const AboutPage = () => {
               <img className={classes.img} alt="complex" src={data.profile_image_url_https} />
             </ButtonBase>
           </Grid>
-          <Grid item xs={3} container>
+          <Grid item xs={12} container>
             <Grid item xs container direction="column" spacing={5}>
               <Grid item xs>
                 <Typography gutterBottom variant="subtitle1">
