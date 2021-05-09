@@ -32,13 +32,6 @@ const IndexPage = () => {
     })
   }
 
-  // const display = () => {
-    
-  //   axios.get(`${process.env.NEXT_PUBLIC_FRONT_SERVER}/api/proxy/twitter`).then((res) => {
-  //     console.log(res.data.user);
-  //   })
-  // }
-
   const classes = useStyles();
   return(
     <div className={classes.root}>
