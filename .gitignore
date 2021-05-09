@@ -4,3 +4,4 @@
 *.env*
 
 memo*
+env.yaml
