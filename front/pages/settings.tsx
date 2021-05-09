@@ -94,12 +94,12 @@ const AboutPage = () => {
     <div className={classes.root}>
     <Paper className={classes.paper}>
         <Grid container spacing={2}>
-          <Grid item>
+          <Grid item xs={2}>
             <ButtonBase className={classes.image}>
               <img className={classes.img} alt="complex" src={data.profile_image_url_https} />
             </ButtonBase>
           </Grid>
-          <Grid item xs={12} container>
+          <Grid item xs={8} container>
             <Grid item xs container direction="column" spacing={5}>
               <Grid item xs>
                 <Typography gutterBottom variant="subtitle1">
