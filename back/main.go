@@ -67,7 +67,7 @@ func allMute(c *gin.Context, token *oauth.AccessToken, method string) {
 		for{
 			resp, err = client.PostWithBody("https://api.twitter.com/1.1/mutes/users/" + method + ".json", "", params, token)
 			if resp.StatusCode == 429{
-				time.Sleep((time.Minute * 1))
+				time.Sleep((time.Minute * 15))
 			} else if resp.StatusCode == 200{
 				break
 			}
@@ -114,9 +114,11 @@ func main() {
 	r.GET("/twitter/oauth", func(c *gin.Context) {
 		loginURL, err := twitter.OAuth(c)
 		if err != nil {
+			fmt.Println(err)
 			c.Redirect(http.StatusSeeOther, "/")
-			return
+			
 		}
+		fmt.Println(loginURL)
 		c.JSON(200, gin.H{"url": loginURL})
 	})
 	r.GET("/twitter/callback", func(c *gin.Context) {

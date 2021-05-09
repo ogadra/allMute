@@ -5,7 +5,6 @@ type User struct {
 	Name       string `json:"name"`
 	ScreenName string `json:"screen_name"`
 	ImageURL   string `json:"profile_image_url_https"`
-	followers_count int64 `json:"friends_count"`
 }
 
 type NewPost struct {
