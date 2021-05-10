@@ -22,7 +22,6 @@ type Props = {
 export default function Header(props: Props) {
   return (
     <div>
-    <title>{props.title}</title>
     <link rel="icon" href="/favicon.ico" />
       <CssBaseline />
         <AppBar>

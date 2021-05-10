@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
 import Header from '../components/header';
+import Ogps from '../components/OGP';
 import React from 'react';
 import Fade from '@material-ui/core/Fade';
 
@@ -90,6 +91,7 @@ const AboutPage = () => {
 
   return (
   <div>
+    <Ogps/>
     <Header title="ツイッターを破壊"/>
     <div className={classes.root}>
     <Paper className={classes.paper}>

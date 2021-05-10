@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 import Header from '../components/header';
+import Ogps from '../components/OGP';
 
 const useStyles = makeStyles({
     root: {
@@ -35,6 +36,7 @@ const IndexPage = () => {
   const classes = useStyles();
   return(
     <div className={classes.root}>
+      <Ogps/>
       <Header title="ツイッターを破壊" />
       <div>
         <Button variant="contained" color="primary" onClick={login}>Log in</Button>
