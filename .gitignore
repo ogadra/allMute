@@ -2,6 +2,7 @@
 !*/
 !*.*
 *.env*
+*.DS_Store
 
 memo*
 env.yaml
