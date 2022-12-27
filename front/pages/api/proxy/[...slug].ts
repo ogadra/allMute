@@ -5,13 +5,13 @@ const target = process.env.BACK_SERVER
 const proxy = httpProxy.createProxyServer({ target, changeOrigin: true });
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
-    req.url = req.url!.replace(new RegExp("^/api/proxy"), "")
+    req.url = req.url!.replace(new RegExp("^/api/proxy"), "");
     return new Promise((resolve, reject) => {
         try {
             proxy.web(req, res, { proxyTimeout: 5000 }, (e) => {
                 reject(e)
             })
-	    resolve
+            resolve
         } catch (e) {
             reject(e)
         }
