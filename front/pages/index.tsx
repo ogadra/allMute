@@ -49,6 +49,12 @@ const IndexPage = () => {
           ツイッターを破壊アプリケーションはAPI規約の変更によりサービスを終了致しました。<br/>
           長らくご愛顧頂きまして誠にありがとうございました。
         </p>
+        <p>
+          コードは
+          <a href='https://github.com/ogadra/allMute'>
+            こちら
+          </a>
+        </p>
         <Button variant="contained" color="primary" onClick={login} disabled>Log in</Button>
       </div>
     </div>
