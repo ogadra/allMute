@@ -9,10 +9,16 @@ const useStyles = makeStyles({
     root: {
       '& > *': {
         margin: "auto",
-        width: "150px",
         display: "block",
         textAlign: "center"
       },
+      '& > p': {
+        width: 'auto',
+        fontSize: '1.2em'
+      },
+      '& > button': {
+        width: "150px",
+      }
     },
   },
 );
@@ -39,7 +45,17 @@ const IndexPage = () => {
       <Ogps/>
       <Header title="ツイッターを破壊" />
       <div>
-        <Button variant="contained" color="primary" onClick={login}>Log in</Button>
+        <p>
+          ツイッターを破壊アプリケーションはAPI規約の変更によりサービスを終了致しました。<br/>
+          長らくご愛顧頂きまして誠にありがとうございました。
+        </p>
+        <p>
+          コードは
+          <a href='https://github.com/ogadra/allMute'>
+            こちら
+          </a>
+        </p>
+        <Button variant="contained" color="primary" onClick={login} disabled>Log in</Button>
       </div>
     </div>
   )
